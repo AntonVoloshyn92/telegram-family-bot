@@ -1,6 +1,6 @@
 package com.anton.bot.telegramfamilybot;
 
-import com.anton.bot.telegramfamilybot.handlers.MySuperBot;
+import com.anton.bot.telegramfamilybot.bot.Bot;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.telegram.telegrambots.ApiContextInitializer;
@@ -12,11 +12,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 public class TelegramFamilyBotApplication {
 
     public static void main(String[] args) throws TelegramApiRequestException {
-        SpringApplication.run(TelegramFamilyBotApplication.class, args);
-      /*  todo cannot */
         ApiContextInitializer.init();
-        TelegramBotsApi telegramBotsApi = new TelegramBotsApi();
-        telegramBotsApi.registerBot(new MySuperBot());
+        SpringApplication.run(TelegramFamilyBotApplication.class, args);
 
     }
 
