@@ -1,5 +1,6 @@
 package com.anton.bot.telegramfamilybot.bot;
 
+import com.anton.bot.telegramfamilybot.model.OperationInComeObject;
 import com.anton.bot.telegramfamilybot.utils.ListKeyMap;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -10,88 +11,113 @@ import static com.anton.bot.telegramfamilybot.utils.StringsValue.*;
 public enum BotState {
 
     BOT_START {
+
+        private BotState next;
+
         @Override
         public void enter(BotContext context) {
-            sendMessage(context, ListKeyMap.getMailMenu());
+            sendMessage(context, ListKeyMap.getMailMenu(), "тип операции");
         }
 
         @Override
         public void handleInput(BotContext context) {
-            context.setResponse(context.getInput());
+            context.getUser().setChoice(context.getInput());
+            switch (context.getInput()) {
+                case INCOME:
+                    next = BOT_CATEGORY_IN;
+                    break;
+            }
         }
+
 
         @Override
         public BotState nextState(BotContext context) {
-            switch (context.getResponse()) {
-                case INCOME:
-                    return BOT_CATEGORY_IN;
-            }
-            return null;
+            return next;
         }
     },
 
     //
     BOT_CATEGORY_IN {
+
+        private BotState next;
+
         @Override
         public void enter(BotContext context) {
-            sendMessage(context, ListKeyMap.getInComeMenu());
+            sendMessage(context, ListKeyMap.getInComeMenu(), "введи категорию расходов");
         }
 
         @Override
         public void handleInput(BotContext context) {
-
+            OperationInComeObject operationInComeObject = new OperationInComeObject();
+            switch (context.getInput()) {
+                case WAGE:
+                    next = BOT_FINISH;
+                    operationInComeObject.setOperationType(WAGE);
+                    context.setOperationInComeObject(operationInComeObject);
+                    break;
+                case SNOWBOARD:
+                    next = BOT_FINISH;
+                    operationInComeObject.setOperationType(SNOWBOARD);
+                    context.setOperationInComeObject(operationInComeObject);
+                    break;
+                case PRIZE:
+                    next = BOT_FINISH;
+                    operationInComeObject.setOperationType(PRIZE);
+                    context.setOperationInComeObject(operationInComeObject);
+                    break;
+                case ELSE:
+                    operationInComeObject.setOperationType(ELSE);
+                    context.setOperationInComeObject(operationInComeObject);
+                    next = BOT_FINISH;
+                    break;
+            }
         }
 
-            @Override
+        @Override
         public BotState nextState(BotContext context) {
-            return null;
+            return next;
         }
 
 
     },
-    BOT_FINISH {
-        @Override
-        protected void sendMessage(BotContext context, ReplyKeyboardMarkup markup) {
-            super.sendMessage(context, markup);
-        }
-
-        @Override
-        public boolean isInputNeeded() {
-            return super.isInputNeeded();
-        }
-
-        @Override
-        protected void sendMessage(BotContext context, String text) {
-            super.sendMessage(context, text);
-        }
-
-        @Override
-        protected BotState nextStep(String message) {
-            return super.nextStep(message);
-        }
-
+    BOT_FINISH() {
         @Override
         public void enter(BotContext context) {
-
-        }
-
-        @Override
-        public BotState nextState(BotContext context) {
-            return null;
+            sendMessage(context, "откорой клавиатуру\n " +
+                    "введи сумму");
         }
 
         @Override
         public void handleInput(BotContext context) {
-            super.handleInput(context);
+//           int sum = Integer.parseInt(context.getInput());
+//           context.getOperationInComeObject().setCoastOperation(sum);
+//           //todo save InComeObject in to DB
+        }
+
+        @Override
+        public BotState nextState(BotContext context) {
+            return APPROVED;
+        }
+    },
+
+    APPROVED(false) {
+        @Override
+        public void enter(BotContext context) {
+            sendMessage(context, "Thanks YOU!");
+        }
+
+        @Override
+        public BotState nextState(BotContext context) {
+            return BOT_START;
         }
     };
 
     private final boolean inputNeeded; //указывает, нужно ли ожтдать ввода от пользователя
 
-    protected void sendMessage(BotContext context, ReplyKeyboardMarkup markup) {
+    protected void sendMessage(BotContext context, ReplyKeyboardMarkup markup, String text) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Выбери категорию доходов");
         sendMessage.setReplyMarkup(markup);
+        sendMessage.setText(text);
         sendMessage.setChatId(context.getUser().getChatId());
 
         try {
@@ -116,22 +142,6 @@ public enum BotState {
         }
     }
 
-    protected BotState nextStep(String message) {
-        switch (message) {
-            case INCOME:
-                return BOT_CATEGORY_IN;
-            case WAGE:
-//                return inComeFinance.editSumOfWage(message);
-            case SNOWBOARD:
-            case PRIZE:
-            case ELSE:
-//                greetingMessage(message);
-            default:
-//                System.out.println("Price: " + message.getText());
-//                return greetingMessage(message);
-                return BOT_FINISH;
-        }
-    }
 
     private static BotState[] states;
 
@@ -147,7 +157,7 @@ public enum BotState {
         return BotState.BOT_START;
     }
 
-    private static BotState byId(int id) {
+    public static BotState byId(int id) {
         if (states == null) {
             states = BotState.values();
         }
@@ -161,4 +171,6 @@ public enum BotState {
     public void handleInput(BotContext context) {
         //default method
     }
+
+
 }

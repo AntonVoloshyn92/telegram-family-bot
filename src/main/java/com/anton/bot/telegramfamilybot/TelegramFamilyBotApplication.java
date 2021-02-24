@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 @SpringBootApplication
 public class TelegramFamilyBotApplication {
 
-    public static void main(String[] args) throws TelegramApiRequestException {
+    public static void main(String[] args)  {
         ApiContextInitializer.init();
         SpringApplication.run(TelegramFamilyBotApplication.class, args);
 

@@ -1,12 +1,13 @@
 package com.anton.bot.telegramfamilybot.bot;
 
+import com.anton.bot.telegramfamilybot.model.OperationInComeObject;
 import com.anton.bot.telegramfamilybot.model.User;
 
 public class BotContext {
     private final Bot bot;
     private final User user;
     private final String input;
-    private String response;
+    private OperationInComeObject operationInComeObject;
     //?
     public static BotContext of(Bot bot, User user, String text){
         return new BotContext(bot,user,text);
@@ -30,11 +31,11 @@ public class BotContext {
         return input;
     }
 
-    public String getResponse() {
-        return response;
+    public OperationInComeObject getOperationInComeObject() {
+        return operationInComeObject;
     }
 
-    public void setResponse(String response) {
-        this.response = response;
+    public void setOperationInComeObject(OperationInComeObject operationInComeObject) {
+        this.operationInComeObject = operationInComeObject;
     }
 }
